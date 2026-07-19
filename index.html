@@ -7,122 +7,158 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Poppins:wght@500;600&amp;display=swap');
-    
     body { font-family: 'Inter', system_ui, sans-serif; }
     .heading-font { font-family: 'Poppins', system_ui, sans-serif; }
-    
-    .pdf-wrapper {
-      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-      border-radius: 16px;
+    .pdf-page {
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      margin-bottom: 24px;
+      border-radius: 8px;
       overflow: hidden;
-      border: 1px solid #e2e8f0;
+    }
+    #pdf-container {
+      max-width: 900px;
+      margin: 0 auto;
     }
   </style>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-100">
   <!-- Header -->
-  <header class="bg-white border-b border-slate-200">
-    <div class="max-w-screen-xl mx-auto px-6 py-5 flex items-center justify-between">
-      <div class="flex items-center gap-x-4">
-        <div class="w-10 h-10 bg-teal-800 rounded-2xl flex items-center justify-center">
-          <i class="fa-solid fa-graduation-cap text-white text-2xl"></i>
+  <header class="bg-white border-b sticky top-0 z-50">
+    <div class="max-w-screen-xl mx-auto px-5 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-x-3">
+        <div class="w-9 h-9 bg-teal-800 rounded-2xl flex items-center justify-center">
+          <i class="fa-solid fa-graduation-cap text-white"></i>
         </div>
         <div>
-          <h1 class="heading-font text-2xl font-semibold text-teal-900 tracking-tight">Job Aid</h1>
-          <p class="text-sm text-teal-700 -mt-1">Prompting AI Generatif untuk Divisi Humas</p>
+          <span class="heading-font font-semibold text-xl text-teal-900">Job Aid</span>
+          <span class="text-sm text-teal-600 block -mt-1">PUSBANGKOM MKMB</span>
         </div>
       </div>
-      
-      <div class="flex items-center gap-x-3">
-        <!-- Download Button -->
-        <a href="job-aid-pusbangkom.pdf" download
-           class="inline-flex items-center gap-x-2.5 bg-teal-700 hover:bg-teal-800 transition-colors text-white px-6 py-3 rounded-3xl text-sm font-semibold shadow-sm">
+
+      <div class="flex items-center gap-x-2">
+        <button onclick="downloadPDF()" 
+                class="flex items-center gap-x-2 bg-teal-700 hover:bg-teal-800 text-white px-5 py-2.5 rounded-3xl text-sm font-semibold transition-colors">
           <i class="fa-solid fa-download"></i>
-          <span>Download PDF</span>
-        </a>
-        
-        <!-- Open in new tab -->
-        <a href="job-aid-pusbangkom.pdf" target="_blank"
-           class="inline-flex items-center gap-x-2 px-5 py-3 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-white rounded-3xl border border-slate-200 transition-colors">
-          <i class="fa-solid fa-external-link-alt"></i>
-          <span>Buka di Tab Baru</span>
-        </a>
+          <span class="hidden sm:inline">Download PDF</span>
+        </button>
       </div>
     </div>
   </header>
 
-  <!-- Hero / Info -->
-  <div class="max-w-screen-xl mx-auto px-6 pt-8 pb-6">
-    <div class="max-w-2xl">
-      <div class="inline-flex items-center gap-x-2 bg-teal-100 text-teal-700 px-4 py-1 rounded-3xl text-sm font-medium mb-4">
-        <i class="fa-solid fa-check-circle"></i>
-        <span>Ver. 1.0 • 05 Juni 2026</span>
+  <!-- Info -->
+  <div class="max-w-screen-xl mx-auto px-5 pt-6 pb-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="heading-font text-2xl font-semibold text-slate-800">Job Aid - Prompting AI Generatif</h1>
+        <p class="text-slate-500 text-sm">13 Halaman • Ver. 1.0</p>
       </div>
-      
-      <h2 class="heading-font text-4xl font-semibold text-slate-900 tracking-tight leading-tight">
-        Job Aid Interaktif<br>
-        <span class="text-teal-700">Prompting AI Generatif</span>
-      </h2>
-      <p class="mt-3 text-slate-600 text-lg">
-        Dokumen resmi PUSBANGKOM MKMB Kemenag RI untuk membantu staf Divisi Humas 
-        menyusun prompt yang efektif dan sesuai standar institusi.
-      </p>
+      <div id="page-info" class="text-sm text-slate-500 font-medium hidden sm:block">
+        Loading...
+      </div>
     </div>
   </div>
 
-  <!-- PDF Embed -->
-  <div class="max-w-screen-xl mx-auto px-6 pb-12">
-    <div class="mb-4 flex items-center justify-between px-1">
-      <div class="flex items-center gap-x-3">
-        <i class="fa-solid fa-file-pdf text-red-500 text-2xl"></i>
-        <div>
-          <span class="font-semibold text-xl text-slate-800">Job Aid - Prompting AI Generatif</span>
-          <span class="ml-3 text-sm px-3 py-1 bg-slate-200 text-slate-600 rounded-2xl font-medium">13 Halaman</span>
-        </div>
-      </div>
+  <!-- PDF Viewer -->
+  <div class="max-w-screen-xl mx-auto px-5 pb-10">
+    <div id="pdf-container" class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200">
+      <!-- PDF pages will be rendered here by PDF.js -->
     </div>
-
-    <!-- Embed PDF -->
-    <div class="pdf-wrapper bg-white">
-      <object 
-        data="job-aid-pusbangkom.pdf" 
-        type="application/pdf" 
-        width="100%" 
-        height="820"
-        class="w-full block">
-        
-        <!-- Fallback jika browser tidak support -->
-        <div class="p-12 text-center bg-slate-100">
-          <i class="fa-solid fa-file-pdf text-6xl text-red-400 mb-4"></i>
-          <p class="text-slate-600 mb-4">Preview PDF tidak tersedia di browser ini.</p>
-          <a href="job-aid-pusbangkom.pdf" download 
-             class="inline-flex items-center gap-x-2 bg-teal-700 text-white px-6 py-3 rounded-3xl text-sm font-semibold">
-            <i class="fa-solid fa-download"></i>
-            <span>Download PDF Sekarang</span>
-          </a>
-        </div>
-      </object>
-    </div>
-
-    <p class="text-center text-xs text-slate-500 mt-3">
-      Scroll untuk melihat seluruh halaman • Zoom menggunakan kontrol PDF viewer
+    
+    <p class="text-center text-xs text-slate-400 mt-4">
+      PDF dirender menggunakan PDF.js • Tampilan optimal di HP &amp; Desktop
     </p>
   </div>
 
-  <!-- Footer -->
-  <footer class="border-t bg-white py-8">
-    <div class="max-w-screen-xl mx-auto px-6 text-center">
-      <p class="text-sm text-slate-500">
-        PUSBANGKOM MKMB • Kementerian Agama Republik Indonesia<br>
-        <span class="text-xs">Dikembangkan untuk keperluan demo &amp; sidang skripsi</span>
-      </p>
-    </div>
-  </footer>
-
+  <script src="pdf.js"></script>
   <script>
-    // Optional: simple tailwind config if needed
-    console.log('%c[Job Aid] Simple wrapper loaded. Siap deploy ke GitHub Pages.', 'color:#64748b');
+    const pdfUrl = 'job-aid-pusbangkom.pdf';
+    let pdfDoc = null;
+
+    async function renderPDF() {
+      const container = document.getElementById('pdf-container');
+      container.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-12 text-slate-400">
+          <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
+          <p>Memuat dokumen...</p>
+        </div>
+      `;
+
+      try {
+        // Set worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.js';
+
+        // Load PDF
+        const loadingTask = pdfjsLib.getDocument(pdfUrl);
+        pdfDoc = await loadingTask.promise;
+
+        container.innerHTML = '';
+        document.getElementById('page-info').innerHTML = `Total: ${pdfDoc.numPages} halaman`;
+        document.getElementById('page-info').classList.remove('hidden');
+
+        // Render semua halaman
+        for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+          const page = await pdfDoc.getPage(pageNum);
+          
+          const viewport = page.getViewport({ scale: 1.5 }); // scale 1.5 = cukup tajam di HP
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+          canvas.className = 'pdf-page w-full max-w-full';
+
+          const renderContext = {
+            canvasContext: context,
+            viewport: viewport
+          };
+
+          await page.render(renderContext).promise;
+
+          // Tambah nomor halaman kecil
+          const pageLabel = document.createElement('div');
+          pageLabel.className = 'text-center text-xs text-slate-400 mt-1 mb-4';
+          pageLabel.innerHTML = `Halaman ${pageNum} / ${pdfDoc.numPages}`;
+
+          const wrapper = document.createElement('div');
+          wrapper.appendChild(canvas);
+          wrapper.appendChild(pageLabel);
+
+          container.appendChild(wrapper);
+        }
+
+      } catch (error) {
+        console.error(error);
+        container.innerHTML = `
+          <div class="text-center py-10 text-red-500">
+            <i class="fa-solid fa-exclamation-triangle text-3xl mb-3"></i>
+            <p>Gagal memuat PDF. Coba refresh halaman.</p>
+          </div>
+        `;
+      }
+    }
+
+    function downloadPDF() {
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = 'Job_Aid_Prompting_AI_Generatif_Pusbangkom.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Init
+    window.onload = function() {
+      if (typeof pdfjsLib === 'undefined') {
+        document.getElementById('pdf-container').innerHTML = `
+          <div class="text-center py-8 text-red-500">
+            File pdf.js belum ditemukan.<br>
+            Pastikan pdf.js dan pdf.worker.js ada di folder yang sama.
+          </div>
+        `;
+        return;
+      }
+      renderPDF();
+    }
   </script>
 </body>
 </html>
