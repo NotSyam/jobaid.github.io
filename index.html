@@ -57,10 +57,10 @@
   </div>
 
   <script type="module">
-    import * as pdfjsLib from './pdf.mjs';
+    import * as pdfjsLib from 'pdf.mjs';
 
     // Set worker
-    pdfjsLib.GlobalWorkerOptions.workerSrc = './pdf.worker.mjs';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.mjs';
 
     const pdfUrl = 'job-aid-pusbangkom.pdf';
     const container = document.getElementById('pdf-container');
