@@ -7,158 +7,127 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
-    body { font-family: 'Inter', system_ui, sans-serif; }
-    .heading-font { font-family: 'Poppins', system_ui, sans-serif; }
+    body { font-family: system-ui, -apple-system, sans-serif; }
     .pdf-page {
-      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
       border-radius: 8px;
       overflow: hidden;
-    }
-    #pdf-container {
-      max-width: 900px;
-      margin: 0 auto;
+      background: white;
     }
   </style>
 </head>
 <body class="bg-slate-100">
+
   <!-- Header -->
   <header class="bg-white border-b sticky top-0 z-50">
-    <div class="max-w-screen-xl mx-auto px-5 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-x-3">
-        <div class="w-9 h-9 bg-teal-800 rounded-2xl flex items-center justify-center">
-          <i class="fa-solid fa-graduation-cap text-white"></i>
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-teal-800 rounded-xl flex items-center justify-center">
+          <i class="fa-solid fa-graduation-cap text-white text-sm"></i>
         </div>
         <div>
-          <span class="heading-font font-semibold text-xl text-teal-900">Job Aid</span>
-          <span class="text-sm text-teal-600 block -mt-1">PUSBANGKOM MKMB</span>
+          <div class="font-semibold text-teal-900 text-lg leading-tight">Job Aid</div>
+          <div class="text-xs text-teal-600 -mt-0.5">PUSBANGKOM MKMB</div>
         </div>
       </div>
 
-      <div class="flex items-center gap-x-2">
-        <button onclick="downloadPDF()" 
-                class="flex items-center gap-x-2 bg-teal-700 hover:bg-teal-800 text-white px-5 py-2.5 rounded-3xl text-sm font-semibold transition-colors">
-          <i class="fa-solid fa-download"></i>
-          <span class="hidden sm:inline">Download PDF</span>
-        </button>
-      </div>
+      <button onclick="downloadPDF()" 
+              class="flex items-center gap-2 bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 rounded-2xl text-sm font-medium transition-colors">
+        <i class="fa-solid fa-download"></i>
+        <span>Download PDF</span>
+      </button>
     </div>
   </header>
 
   <!-- Info -->
-  <div class="max-w-screen-xl mx-auto px-5 pt-6 pb-4">
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="heading-font text-2xl font-semibold text-slate-800">Job Aid - Prompting AI Generatif</h1>
-        <p class="text-slate-500 text-sm">13 Halaman • Ver. 1.0</p>
-      </div>
-      <div id="page-info" class="text-sm text-slate-500 font-medium hidden sm:block">
-        Loading...
+  <div class="max-w-5xl mx-auto px-4 pt-5 pb-3">
+    <h1 class="text-xl font-semibold text-slate-800">Job Aid - Prompting AI Generatif</h1>
+    <p class="text-sm text-slate-500 mt-0.5">13 Halaman • Ver. 1.0</p>
+  </div>
+
+  <!-- PDF Container -->
+  <div class="max-w-5xl mx-auto px-4 pb-10">
+    <div id="pdf-container" class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 min-h-[400px]">
+      <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+        <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
+        <p>Memuat dokumen...</p>
       </div>
     </div>
   </div>
 
-  <!-- PDF Viewer -->
-  <div class="max-w-screen-xl mx-auto px-5 pb-10">
-    <div id="pdf-container" class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200">
-      <!-- PDF pages will be rendered here by PDF.js -->
-    </div>
-    
-    <p class="text-center text-xs text-slate-400 mt-4">
-      PDF dirender menggunakan PDF.js • Tampilan optimal di HP &amp; Desktop
-    </p>
-  </div>
+  <script type="module">
+    import * as pdfjsLib from './pdf.mjs';
 
-  <script src="pdf.js"></script>
-  <script>
+    // Set worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = './pdf.worker.mjs';
+
     const pdfUrl = 'job-aid-pusbangkom.pdf';
-    let pdfDoc = null;
+    const container = document.getElementById('pdf-container');
 
     async function renderPDF() {
-      const container = document.getElementById('pdf-container');
-      container.innerHTML = `
-        <div class="flex flex-col items-center justify-center py-12 text-slate-400">
-          <i class="fa-solid fa-spinner fa-spin text-3xl mb-3"></i>
-          <p>Memuat dokumen...</p>
-        </div>
-      `;
-
       try {
-        // Set worker
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.js';
-
-        // Load PDF
         const loadingTask = pdfjsLib.getDocument(pdfUrl);
-        pdfDoc = await loadingTask.promise;
+        const pdf = await loadingTask.promise;
 
-        container.innerHTML = '';
-        document.getElementById('page-info').innerHTML = `Total: ${pdfDoc.numPages} halaman`;
-        document.getElementById('page-info').classList.remove('hidden');
+        container.innerHTML = ''; // clear loading
 
         // Render semua halaman
-        for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
-          const page = await pdfDoc.getPage(pageNum);
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
           
-          const viewport = page.getViewport({ scale: 1.5 }); // scale 1.5 = cukup tajam di HP
+          // Scale 1.4 cukup bagus di HP & desktop
+          const viewport = page.getViewport({ scale: 1.4 });
+          
           const canvas = document.createElement('canvas');
           const context = canvas.getContext('2d');
           
           canvas.height = viewport.height;
           canvas.width = viewport.width;
-          canvas.className = 'pdf-page w-full max-w-full';
+          canvas.className = 'pdf-page w-full';
+          canvas.style.maxWidth = '100%';
 
-          const renderContext = {
+          await page.render({
             canvasContext: context,
             viewport: viewport
-          };
+          }).promise;
 
-          await page.render(renderContext).promise;
-
-          // Tambah nomor halaman kecil
-          const pageLabel = document.createElement('div');
-          pageLabel.className = 'text-center text-xs text-slate-400 mt-1 mb-4';
-          pageLabel.innerHTML = `Halaman ${pageNum} / ${pdfDoc.numPages}`;
+          // Label halaman
+          const label = document.createElement('div');
+          label.className = 'text-center text-xs text-slate-400 mb-5';
+          label.textContent = `Halaman ${pageNum} / ${pdf.numPages}`;
 
           const wrapper = document.createElement('div');
           wrapper.appendChild(canvas);
-          wrapper.appendChild(pageLabel);
-
+          wrapper.appendChild(label);
+          
           container.appendChild(wrapper);
         }
 
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
         container.innerHTML = `
-          <div class="text-center py-10 text-red-500">
-            <i class="fa-solid fa-exclamation-triangle text-3xl mb-3"></i>
-            <p>Gagal memuat PDF. Coba refresh halaman.</p>
+          <div class="text-center py-12 text-red-500">
+            <i class="fa-solid fa-triangle-exclamation text-3xl mb-3"></i>
+            <p class="font-medium">Gagal memuat PDF</p>
+            <p class="text-sm mt-1 text-slate-500">Pastikan file pdf.mjs, pdf.worker.mjs, dan PDF-nya ada di folder yang sama.</p>
           </div>
         `;
       }
     }
 
-    function downloadPDF() {
-      const link = document.createElement('a');
-      link.href = pdfUrl;
-      link.download = 'Job_Aid_Prompting_AI_Generatif_Pusbangkom.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+    // Download function
+    window.downloadPDF = function() {
+      const a = document.createElement('a');
+      a.href = pdfUrl;
+      a.download = 'Job_Aid_Prompting_AI_Generatif_Pusbangkom.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
 
-    // Init
-    window.onload = function() {
-      if (typeof pdfjsLib === 'undefined') {
-        document.getElementById('pdf-container').innerHTML = `
-          <div class="text-center py-8 text-red-500">
-            File pdf.js belum ditemukan.<br>
-            Pastikan pdf.js dan pdf.worker.js ada di folder yang sama.
-          </div>
-        `;
-        return;
-      }
-      renderPDF();
-    }
+    // Jalankan
+    renderPDF();
   </script>
 </body>
 </html>
